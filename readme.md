@@ -1,5 +1,6 @@
 
-![python](https://img.shields.io/badge/-python%20-yellow?logo=python) ![python](https://img.shields.io/badge/-docker%20-black?logo=docker) ![django](https://img.shields.io/badge/-redis%20-white?logo=redis)  ![django](https://img shields.io/badge/-postgres%20-blue?logo=postgresql&logoColor=white)
+![python](https://img.shields.io/badge/-python%20-yellow?logo=python) ![docker](https://img.shields.io/badge/-docker%20-black?logo=docker) ![redis](https://img.shields.io/badge/-redis%20-white?logo=redis)
+![postgres](https://img.shields.io/badge/-postgres%20-blue?logo=postgresql&logoColor=white)
 
 ## Acerca de 
 
