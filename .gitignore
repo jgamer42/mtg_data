@@ -282,3 +282,4 @@ redis-data
 mysql-data
 .ipynb_checkpoints
 postgres-data
+.vscode
