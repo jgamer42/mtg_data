@@ -4,7 +4,7 @@
 
 ## Acerca de 
 
-Este es un proyecto para mi tiempo libre en el cual aplico todos los nuevos concimientos que voy  sobre 
+Este es un proyecto para mi tiempo libre en el cual aplico todos los nuevos concimientos que voy adquiriendo sobre 
 - Procesamiento de datos
 - Analisis de datos 
 - ML
