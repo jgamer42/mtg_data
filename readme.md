@@ -33,7 +33,7 @@ alembic upgrade head
 
 para conectarse a redis
 ```sh
-alembic upgrade head
+redis-cli
 ```
 
 ## Siguientes pasos

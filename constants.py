@@ -26,8 +26,8 @@ COLORS_IDENTITY = {
     'BGUW': 'Witch-Maw'
 }
 
-ALLOWED_FORMATS = ["commander","standard","modern","pioneer","pauper"]
-BASIC_LANDS = ["plains","mountain","forest","swamp","island"]
+ALLOWED_FORMATS = set(["commander","standard","modern","pioneer","pauper"])
+BASIC_LANDS = set(["plains","mountain","forest","swamp","island"])
 TYPES_TOKENIZER = {
     'creature': 0, 
     'instant': 1, 

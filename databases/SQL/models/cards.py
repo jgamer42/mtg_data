@@ -16,6 +16,7 @@ class Set(SQL_model_base):
     code = Column(String(250),nullable=False)
     scry_fall_id = Column(String(250),nullable=False)
     is_spoiler = Column(Boolean,default=False)
+    release_date = Column(String(250),nullable=True)
 
 
 class Card(SQL_model_base):

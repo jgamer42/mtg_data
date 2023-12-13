@@ -3,7 +3,6 @@ from urllib3.util import Retry
 from requests.adapters import HTTPAdapter
 import time
 import threading
-import random
 class ScryFall:
     def __init__(self):
         self.mined_pages = []
@@ -88,21 +87,6 @@ class ScryFall:
             output = cards["data"]
         return output
         
-    def get_card_by_oracle_id(self,oracle_id:str):
-        card = self.http.get(
-                f'{self.url}/cards/search?q=oracle_id={oracle_id}')
-        if card.status_code == 404:
-            return None
-        elif card.status_code != 200:
-            self.hard_retries += 1
-            time.sleep(5)
-            if self.hard_retries < self.max_hard_retries:
-                return  self.get_card_by_oracle_id(oracle_id)
-            else:
-                return None
-        output = card.json()['data']
-        self.hard_retries = 0
-        return output
     
     def get_card_by_function(self,function:str):
         cards = self.http.get(
@@ -134,19 +118,4 @@ class ScryFall:
             cards = response.json()
             output += cards["data"]
             self.mined_pages.append(current_page)
-            current_page += 1
-            
-    def get_reprints(self,id):
-        control = random.randint(1,10000)
-        if control % 13 == 0:
-            time.sleep(5)
-        output = []
-        response = self.http.get(f"{self.url}/cards/search?q=oracleid%3A{id}&unique=prints")
-        cards = response.json()
-        try:
-            output = cards["data"]
-        except Exception as E:
-            print(f"falle reprints",E,cards,id)
-            raise ValueError
-        return output
-    
+            current_page += 1    
