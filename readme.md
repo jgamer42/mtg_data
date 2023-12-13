@@ -15,6 +15,9 @@ para ser aplicados al juego magic the gathering
 - a-priori -> Se uso para ver las reglas de asociacion entre la legalidad de las cartas entre formatos
 - Dijstra (WIP)
 - Knn (WIP)
+- Decission tree (WIP)
+- K-means (WIP)
+- DBScan
 
 ## Diseño Base de datos
 ![bd](/doc/BD_design.png)
