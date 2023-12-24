@@ -1,6 +1,7 @@
 import scrapy
 from lxml import html
-
+import logging
+logging.basicConfig(filename="scrapper.log",level=logging.DEBUG)
 
 class MtgTop8(scrapy.Spider):
     """
@@ -16,6 +17,7 @@ class MtgTop8(scrapy.Spider):
         "pauper": "PAU",
         "legacy": "LE",
         "vintage": "VI",
+        "explorer":"EXP"
     }
     memory: list = []
     aux = ""
@@ -59,14 +61,13 @@ class MtgTop8(scrapy.Spider):
         :param response: Response object with the page information
         :return: A generator with the decks information
         """
-        decks = response.xpath("//div[@class='hover_tr']").getall()
-        decks = decks + response.xpath("//div[@class='chosen_tr']").getall()
+        decks = response.xpath("//div[@class='hover_tr'] | //div[@class='chosen_tr'] ").getall()
         date = response.xpath('//div[@style="margin-bottom:5px;"]/text()').getall()
         tournament["date"] = date[0]
+        tournament["expected_decks"] = len(decks)
         for deck in decks:
             try:
                 deck_loaded = html.fromstring(deck)
-
                 deck_link: str = deck_loaded.xpath("div/div[3]/div[1]/a/@href")[0]
                 link: str = f"{self.base_url}/event{deck_link}"
                 deck_name: str = deck_loaded.xpath("div/div[3]/div[1]/a/text()")[0]
@@ -79,7 +80,7 @@ class MtgTop8(scrapy.Spider):
                 tournament["decks"].append({"name":deck_name,"card_list":output.callback(response),"player_name":player_name,"standings":standings})
                 yield tournament
             except Exception as e:
-                print("wops something wrong",e)
+                logging.error(f"Toteo {self.base_url}/event{deck_link}")
 
     def decks(self, response):
         """

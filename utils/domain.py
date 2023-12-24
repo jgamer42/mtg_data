@@ -45,6 +45,10 @@ def clean_types(card):
     
 def clean_legalities(card):
     for format in ALLOWED_FORMATS:
-        card[f"{format}_legal"] = card["legalities"][format]
+        if card["legalities"][format].lower() == "not legal":
+            target = False
+        else:
+            target = True 
+        card[f"{format}_legal"] = target
     del card["legalities"]
     

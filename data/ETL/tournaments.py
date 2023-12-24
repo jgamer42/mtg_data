@@ -26,10 +26,10 @@ def clean_date(date:str):
 decks_to_insert = []
 standings_map = []
 cards_to_insert = []
+logging.basicConfig(filename="scrapper.log",level=logging.DEBUG)
 def handle_data(item:dict):
     global decks_to_insert
     global standings_map
-    global not_found_cards
     tournament_information = {
         "source":"mtgTop8",
         "link":item["link"].strip(),
@@ -37,8 +37,10 @@ def handle_data(item:dict):
         "name":item["name"].strip(),
         "format":item["format"]
     }
+    if len(item["decks"]) != item["expected_decks"]:
+        return 
     possible_tournament = SQL_database.query(SQL_model.Tournament.id).filter(SQL_model.Tournament.link == item["link"])
-    if possible_tournament.count() >= 1:
+    if SQL_database.query(possible_tournament.exists()).scalar():
         return 
     target_tournament = SQL_model.Tournament(**tournament_information)
     SQL_database.add(target_tournament)
@@ -51,7 +53,7 @@ def handle_data(item:dict):
         }
         decks_to_insert.append(SQL_model.Deck(**deck_base_info))
         deck_name = f'{deck_base_info["name"]}****{deck_base_info["player"]}'
-        standings_map.append({"deck":deck["standings"],"tournament":target_tournament.id,"place":deck["standings"].strip()})
+        standings_map.append({"deck":deck_name,"tournament":target_tournament.id,"place":deck["standings"].strip()})
         for card in deck["card_list"]:
             card_name = " ".join([c.strip()for c in card["name"].strip().split()])
             if card_name.lower() in BASIC_LANDS:
@@ -61,7 +63,11 @@ def handle_data(item:dict):
                 main_card = SQL_database.query(SQL_model.Card.id).filter(SQL_model.Card.name == card_name)
                 if main_card.count() == 0:
                     main_card = SQL_database.query(SQL_model.Card.id).filter(SQL_model.Card.name.like(f"{card_name}%")).all()    
-                card_id = main_card[0][0]
+                try:
+                    card_id = main_card[0][0]
+                except:
+                    main_card = SQL_database.query(SQL_model.Card.id).filter(SQL_model.Card.name.like(f"{card_name.split('/')[0]}%{card_name.split('/')[1]}")).all()    
+                    card_id = main_card[0][0]
                 cache_db.set(card_name,card_id)
             card_information = {
                 "deck":deck_name,
@@ -80,7 +86,38 @@ crawler.signals.connect(
     handle_data, signal=signals.item_scraped
 )
 process.crawl(crawler, format="standard")
+crawler = Crawler(MtgTop8)
+crawler.signals.connect(
+    handle_data, signal=signals.item_scraped
+)
+process.crawl(crawler, format="pioneer")
+crawler = Crawler(MtgTop8)
+crawler.signals.connect(
+    handle_data, signal=signals.item_scraped
+)
+process.crawl(crawler, format="modern")
+crawler = Crawler(MtgTop8)
+crawler.signals.connect(
+    handle_data, signal=signals.item_scraped
+)
+process.crawl(crawler, format="pauper")
+crawler = Crawler(MtgTop8)
+crawler.signals.connect(
+    handle_data, signal=signals.item_scraped
+)
+process.crawl(crawler, format="legacy")
+crawler = Crawler(MtgTop8)
+crawler.signals.connect(
+    handle_data, signal=signals.item_scraped
+)
+process.crawl(crawler, format="vintage")
+crawler = Crawler(MtgTop8)
+crawler.signals.connect(
+    handle_data, signal=signals.item_scraped
+)
+process.crawl(crawler, format="explorer")
 process.start()
+
 SQL_database.bulk_save_objects(decks_to_insert)
 SQL_database.commit()
 clean_cards = []
@@ -105,4 +142,4 @@ for standing in standings_map:
     clean_standings.append(SQL_model.Standings(**{"deck":deck_id,"tournament":standing["tournament"],"place":standing["place"]}))
 
 SQL_database.bulk_save_objects(clean_standings)
-SQL_database.commit()    
+SQL_database.commit()

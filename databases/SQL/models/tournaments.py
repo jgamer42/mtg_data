@@ -5,7 +5,6 @@ load_dotenv()
 from sqlalchemy import Column, Integer, String,ForeignKey,DateTime
 sys.path.append(f'{os.environ["PROJECT_PATH"]}')
 from databases import SQL_model_base
-from datetime import datetime 
 
 
 class Tournament(SQL_model_base):
