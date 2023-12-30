@@ -76,3 +76,9 @@ class SuggestedPrice(SQL_model_base):
     source = Column(String(250))
     is_foil = Column(Boolean)
     date = Column(DateTime,nullable=False,default=datetime.now())
+    
+    
+class Commander(SQL_model_base):
+    __tablename__ = "commander"
+    id = Column(Integer, primary_key=True)      
+    card = Column(Integer,ForeignKey("cards.id"))  

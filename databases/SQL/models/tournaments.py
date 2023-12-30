@@ -2,7 +2,7 @@ import os
 import sys
 from dotenv import load_dotenv
 load_dotenv() 
-from sqlalchemy import Column, Integer, String,ForeignKey,DateTime
+from sqlalchemy import Column, Integer, String,ForeignKey,DateTime,Boolean
 sys.path.append(f'{os.environ["PROJECT_PATH"]}')
 from databases import SQL_model_base
 
@@ -23,14 +23,13 @@ class Deck(SQL_model_base):
     name = Column(String(250),nullable=False)
     player = Column(String(250),nullable=False)
     
-    
 class DeckCard(SQL_model_base):
     __tablename__ = 'card_deck'
     id = Column(Integer, primary_key=True)
     deck = Column(Integer,ForeignKey("decks.id"))
     card = Column(Integer,ForeignKey("cards.id"))
     quantity = Column(Integer,nullable=False)
-
+    is_commander = Column(Boolean,default =False)
 class Standings(SQL_model_base):
     __tablename__ = 'standings'
     id = Column(Integer, primary_key=True)

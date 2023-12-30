@@ -11,6 +11,14 @@ def clean_colors(colors:list):
         return COLORS_IDENTITY.get(processed,"")
     except TypeError:
         return ""
+    
+def clean_mana_cost(mana_cost:str)->list:
+    possible_colors = ["W","U","R","B","G"]
+    present_colors = []
+    for color in possible_colors:
+        if color in mana_cost:
+            present_colors.append(color)
+    return present_colors
 
 def clean_type(raw_type):
     principal_type = raw_type.split("—")[0].strip()

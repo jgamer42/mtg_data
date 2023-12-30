@@ -38,7 +38,7 @@ def handle_data(item:dict):
         "format":item["format"]
     }
     if len(item["decks"]) != item["expected_decks"]:
-        return 
+        return
     possible_tournament = SQL_database.query(SQL_model.Tournament.id).filter(SQL_model.Tournament.link == item["link"])
     if SQL_database.query(possible_tournament.exists()).scalar():
         return 
@@ -55,7 +55,7 @@ def handle_data(item:dict):
         deck_name = f'{deck_base_info["name"]}****{deck_base_info["player"]}'
         standings_map.append({"deck":deck_name,"tournament":target_tournament.id,"place":deck["standings"].strip()})
         for card in deck["card_list"]:
-            card_name = " ".join([c.strip()for c in card["name"].strip().split()])
+            card_name = " ".join([c.strip()for c in card["name"].strip().split()]).strip()
             if card_name.lower() in BASIC_LANDS:
                 continue
             card_id = cache_db.get(card_name)
@@ -66,8 +66,22 @@ def handle_data(item:dict):
                 try:
                     card_id = main_card[0][0]
                 except:
-                    main_card = SQL_database.query(SQL_model.Card.id).filter(SQL_model.Card.name.like(f"{card_name.split('/')[0]}%{card_name.split('/')[1]}")).all()    
-                    card_id = main_card[0][0]
+                    name_parts = card_name.split('/')
+                    if len(name_parts) == 1: 
+                        main_card = SQL_database.query(SQL_model.Card.id).filter(SQL_model.Card.name.like(f"{name_parts[0]}%")).all()    
+                    elif len(name_parts) >= 2:
+                        main_card = SQL_database.query(SQL_model.Card.id).filter(SQL_model.Card.name.like(f"{name_parts[0]}%{name_parts[1]}")).all()    
+                    elif len(main_card) == 0:
+                        print(f"voy a fallar {card_name}")
+                        continue
+                    else:
+                        print(f"voy a fallar por abajo {card_name}")
+                        continue
+                    try:
+                        card_id = main_card[0][0]
+                    except:
+                        print(f"falle en {card_name}")
+                        continue
                 cache_db.set(card_name,card_id)
             card_information = {
                 "deck":deck_name,
@@ -75,17 +89,56 @@ def handle_data(item:dict):
                 "quantity":card["quantity"]
             }
             cards_to_insert.append(card_information)
-                    
+        if item["format"] == 'commander':
+            for commander_card in deck["commander"]:
+                card_id = cache_db.get(commander_card)
+                if card_id is None:
+                    main_card = SQL_database.query(SQL_model.Card.id).filter(SQL_model.Card.name == commander_card)
+                    if main_card.count() == 0:
 
-
+                        main_card = SQL_database.query(SQL_model.Card.id).filter(SQL_model.Card.name.like(f"{commander_card}%")).all()    
+                    try:
+                        card_id = main_card[0][0]
+                    except:
+                        name_parts = commander_card.split('/')
+                        if len(name_parts) == 1: 
+                            main_card = SQL_database.query(SQL_model.Card.id).filter(SQL_model.Card.name.like(f"{name_parts[0]}%")).all()    
+                        elif len(name_parts) >= 2:
+                            main_card = SQL_database.query(SQL_model.Card.id).filter(SQL_model.Card.name.like(f"{name_parts[0]}%{name_parts[1]}")).all()    
+                        elif len(main_card) == 0:
+                            print(f"voy a fallar con el commandante {commander_card}")
+                            continue
+                        else:
+                            print(f"voy a fallar por abajo con el commandante {commander_card}")
+                            continue
+                        try:
+                            card_id = main_card[0][0]
+                        except:
+                            print(f"falle en {commander_card}")
+                            continue
+                    card_id = main_card[0][0]
+                    cache_db.set(commander_card,card_id)
+                card_information = {
+                    "deck":deck_name,
+                    "card":card_id,
+                    "quantity":1,
+                    "is_commander":True
+                }
+                cache_db.set(commander_card,card_id)
+                cards_to_insert.append(card_information)
                 
-        
+                
 process = CrawlerProcess()
+'''crawler = Crawler(MtgTop8)
+crawler.signals.connect(
+    handle_data, signal=signals.item_scraped
+)
+process.crawl(crawler, format="standard")'''
 crawler = Crawler(MtgTop8)
 crawler.signals.connect(
     handle_data, signal=signals.item_scraped
 )
-process.crawl(crawler, format="standard")
+process.crawl(crawler, format="commander")
 crawler = Crawler(MtgTop8)
 crawler.signals.connect(
     handle_data, signal=signals.item_scraped
@@ -131,7 +184,8 @@ for card in cards_to_insert:
     target_card = {
         "deck":deck_id,
         "quantity":card["quantity"],
-        "card":card["card"]
+        "card":card["card"],
+        "is_commander":card.get("is_commander",False)
     }
     clean_cards.append(SQL_model.DeckCard(**target_card))
 SQL_database.bulk_save_objects(clean_cards)
