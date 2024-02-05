@@ -149,7 +149,7 @@ soupsieve==2.5
 SQLAlchemy==1.4.41
 sqlalchemy2-stubs==0.0.2a35
 stack-data==0.6.3
-starlette==0.27.0
+starlette==0.36.2
 tensorboard==2.13.0
 tensorboard-data-server==0.7.1
 tensorflow==2.13.0
