@@ -31,7 +31,7 @@ defusedxml==0.7.1
 ecdsa==0.18.0
 exceptiongroup==1.1.2
 executing==2.0.1
-fastapi==0.101.0
+fastapi==0.109.1
 fastjsonschema==2.18.1
 filelock==3.12.2
 flatbuffers==23.5.26
